@@ -172,6 +172,16 @@
     -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent;
   }
   .tagline{ font-family:ui-monospace, 'SF Mono', Consolas, 'Courier New', monospace; font-size:10.5px; letter-spacing:0.24em; color:var(--ink-dim); text-transform:uppercase; margin:2px 0 18px; }
+
+  .tab-nav{ display:flex; gap:4px; margin-bottom:18px; border-bottom:1px solid var(--line); }
+  .tab-btn{
+    flex:1; padding:9px 4px; background:none; border:none; cursor:pointer;
+    font-family:ui-monospace, 'SF Mono', Consolas, 'Courier New', monospace; font-size:11px;
+    color:var(--ink-dim); border-bottom:2px solid transparent; margin-bottom:-1px;
+    letter-spacing:0.02em;
+  }
+  .tab-btn.active{ color:var(--cyan); border-bottom-color:var(--cyan); }
+  .tab-content{ min-height:120px; }
   .subtitle{ color:var(--ink-dim); font-size:13.5px; margin:0 0 22px; line-height:1.5; }
   .row{ display:flex; gap:10px; margin-bottom:10px; }
   .stat-pill{
@@ -272,6 +282,22 @@
     text-align:center; line-height:1.5; pointer-events:none;
   }
 
+  #weapon-bar{
+    position:absolute; bottom:164px; left:50%; transform:translateX(-50%); z-index:5;
+    display:flex; gap:10px; pointer-events:none;
+  }
+  .weapon-icon{
+    width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(10,12,22,0.6); border:1.5px solid var(--wcolor, #fff);
+    box-shadow:0 0 10px var(--wcolor, transparent);
+    position:relative;
+  }
+  .weapon-icon .core{ width:12px; height:12px; border-radius:50%; background:var(--wcolor, #fff); }
+  .weapon-icon .pips{ position:absolute; bottom:-9px; left:50%; transform:translateX(-50%); display:flex; gap:2px; }
+  .weapon-icon .pips span{ width:4px; height:4px; border-radius:50%; background:rgba(255,255,255,0.18); }
+  .weapon-icon .pips span.on{ background:var(--wcolor, #fff); }
+
   ::-webkit-scrollbar{ width:6px; }
   ::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.15); border-radius:6px; }
 </style>
@@ -319,37 +345,74 @@
     <div id="swipe-anchor"></div>
     <div id="swipe-nub"></div>
   </div>
+  <div id="weapon-bar" class="hidden"></div>
   <div id="hint">Wischen zum Bewegen — Ziel automatisch</div>
+
+  <!-- ERST-TUTORIAL -->
+  <div id="firstrun-overlay" class="overlay hidden" style="z-index:11;">
+    <div class="panel">
+      <div class="logo-row"><div class="logo-orb"></div><div><h1 class="title">Willkommen</h1></div></div>
+      <p class="subtitle" style="margin-bottom:20px;">Drei Dinge, bevor es losgeht:</p>
+      <div class="howto-section">
+        <div class="howto-h">1. Bewegung</div>
+        <p>Tippe irgendwo hin und ziehe — dein Kern driftet dorthin. Zielen und Schießen laufen automatisch.</p>
+      </div>
+      <div class="howto-section">
+        <div class="howto-h">2. Ziel</div>
+        <p>Überlebe Wellen, sammle Splitter, wähle bei jedem Levelaufstieg neue Waffen oder Verbesserungen.</p>
+      </div>
+      <div class="howto-section">
+        <div class="howto-h">3. Notfalls pausieren</div>
+        <p>Das ⏸-Symbol oben rechts hält den Lauf jederzeit an — auch für einen Blick auf deinen Build.</p>
+      </div>
+      <button class="primary-btn" id="firstrun-close-btn">Los geht's</button>
+    </div>
+  </div>
 
   <!-- START / SHOP -->
   <div id="start-overlay" class="overlay">
     <div class="panel">
       <div class="logo-row"><div class="logo-orb"></div><div><h1 class="title">Nyxveil</h1></div></div>
       <div class="tagline">Survive the Spectrum</div>
-      <p class="subtitle">Du bist ein driftender Energie-Kern in einer endlosen Farbdrift. Absorbiere Chroma-Splitter, entwickle dich weiter, besiege Overseer-Bosse und überlebe so viele Wellen wie möglich. Gefallene Kerne hinterlassen Essenz — permanenten Fortschritt für den nächsten Lauf.</p>
 
-      <div class="row">
-        <div class="stat-pill"><div class="k">Bestwelle</div><div class="v" id="best-wave">0</div></div>
-        <div class="stat-pill"><div class="k">Highscore</div><div class="v" id="best-score">0</div></div>
-        <div class="stat-pill"><div class="k">Essenz</div><div class="v" id="essence-total" style="color:var(--gold);">0</div></div>
-      </div>
-      <div id="won-badge" class="hidden" style="text-align:center; font-size:12px; color:var(--gold); margin-bottom:14px; letter-spacing:0.06em;">✦ Nyxveil bereits bezwungen ✦</div>
-
-      <div id="leaderboard-wrap">
-        <div class="howto-h" style="margin-bottom:8px;">Bestenliste (dieses Gerät)</div>
-        <div id="leaderboard-list"></div>
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="play">Spielen</button>
+        <button class="tab-btn" data-tab="shop">Shop</button>
+        <button class="tab-btn" data-tab="board">Bestenliste</button>
+        <button class="tab-btn" data-tab="settings">Optionen</button>
       </div>
 
-      <div id="shop-list"></div>
+      <div class="tab-content" data-tab-content="play">
+        <p class="subtitle">Du bist ein driftender Energie-Kern in einer endlosen Farbdrift. Absorbiere Chroma-Splitter, entwickle dich weiter, besiege Overseer-Bosse und überlebe so viele Wellen wie möglich. Gefallene Kerne hinterlassen Essenz — permanenten Fortschritt für den nächsten Lauf.</p>
+        <div class="row">
+          <div class="stat-pill"><div class="k">Bestwelle</div><div class="v" id="best-wave">0</div></div>
+          <div class="stat-pill"><div class="k">Highscore</div><div class="v" id="best-score">0</div></div>
+          <div class="stat-pill"><div class="k">Essenz</div><div class="v" id="essence-total" style="color:var(--gold);">0</div></div>
+        </div>
+        <div id="won-badge" class="hidden" style="text-align:center; font-size:12px; color:var(--gold); margin-bottom:14px; letter-spacing:0.06em;">✦ Nyxveil bereits bezwungen ✦</div>
+        <button class="primary-btn" id="start-btn">Lauf starten</button>
+        <button class="ghost-btn" id="howto-btn">Anleitung</button>
+      </div>
 
-      <button class="primary-btn" id="start-btn">Lauf starten</button>
-      <button class="ghost-btn" id="howto-btn">Anleitung</button>
-      <button class="ghost-btn" id="sound-btn">🔊 Sound An</button>
-      <button class="ghost-btn" id="reset-btn">Speicherstand zurücksetzen</button>
-      <div id="legal-links">
-        <a href="impressum.html" target="_blank" rel="noopener">Impressum</a>
-        <span>·</span>
-        <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>
+      <div class="tab-content hidden" data-tab-content="shop">
+        <div id="shop-list"></div>
+      </div>
+
+      <div class="tab-content hidden" data-tab-content="board">
+        <div id="leaderboard-wrap">
+          <div class="howto-h" style="margin-bottom:8px;">Bestenliste (dieses Gerät)</div>
+          <div id="leaderboard-list"></div>
+        </div>
+      </div>
+
+      <div class="tab-content hidden" data-tab-content="settings">
+        <button class="ghost-btn" id="sound-btn">🔊 Sound An</button>
+        <button class="ghost-btn" id="reset-btn">Speicherstand zurücksetzen</button>
+        <div id="legal-links">
+          <a href="impressum.html" target="_blank" rel="noopener">Impressum</a>
+          <span>·</span>
+          <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>
+        </div>
       </div>
     </div>
   </div>
@@ -498,7 +561,8 @@ const defaultSave = {
   upgrades: { hp:0, dmg:0, speed:0, magnet:0, regen:0, ult:0 },
   soundOn: true,
   runs: [],
-  hasWon: false
+  hasWon: false,
+  tutorialSeen: false
 };
 let save = JSON.parse(JSON.stringify(defaultSave));
 
@@ -517,6 +581,9 @@ async function loadSave(){
   refreshShopUI();
   refreshLeaderboardUI();
   updateSoundBtn();
+  if(!save.tutorialSeen){
+    document.getElementById("firstrun-overlay").classList.remove("hidden");
+  }
 }
 async function persistSave(){
   try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }
@@ -729,11 +796,25 @@ document.getElementById("reset-btn").addEventListener("click", async ()=>{
   refreshLeaderboardUI();
 });
 
+document.getElementById("firstrun-close-btn").addEventListener("click", ()=>{
+  save.tutorialSeen = true;
+  persistSave();
+  document.getElementById("firstrun-overlay").classList.add("hidden");
+});
+
 document.getElementById("howto-btn").addEventListener("click", ()=>{
   document.getElementById("howto-overlay").classList.remove("hidden");
 });
 document.getElementById("howto-close-btn").addEventListener("click", ()=>{
   document.getElementById("howto-overlay").classList.add("hidden");
+});
+
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const tab = btn.dataset.tab;
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.toggle("active", b===btn));
+    document.querySelectorAll(".tab-content").forEach(c=>c.classList.toggle("hidden", c.dataset.tabContent!==tab));
+  });
 });
 
 /* ---------- Input: reine Wisch-/Drag-Steuerung ---------- */
@@ -1680,6 +1761,7 @@ function endGame(){
   document.getElementById("minimap").classList.add("hidden");
   document.getElementById("ult-wrap").classList.add("hidden");
   document.getElementById("pause-btn").classList.add("hidden");
+  document.getElementById("weapon-bar").classList.add("hidden");
   document.getElementById("pause-overlay").classList.add("hidden");
   document.getElementById("gameover-overlay").classList.remove("hidden");
   refreshLeaderboardUI();
@@ -2113,12 +2195,34 @@ function spawnFloatingText(x,y,text,color,size){
   game.floatingTexts.push({x,y,text,color,size:size||14,life:0.9,maxLife:0.9});
 }
 
+const WEAPON_BAR_ORDER = ["lance","nova","aegis","swarm","fused_ls","fused_na"];
+function weaponHex(key){
+  if(WEAPON_DEFS[key]) return WEAPON_DEFS[key].hex;
+  const fd = FUSION_DEFS.find(f=>f.key===key);
+  return fd ? fd.hex : "#ffffff";
+}
+let lastWeaponBarKey = "";
+function updateWeaponBar(p){
+  const owned = WEAPON_BAR_ORDER.filter(k=>p.weapons[k]);
+  const sig = owned.map(k=>k+p.weapons[k].level).join(",");
+  if(sig===lastWeaponBarKey) return;
+  lastWeaponBarKey = sig;
+  const bar = document.getElementById("weapon-bar");
+  bar.innerHTML = owned.map(k=>{
+    const lvl = p.weapons[k].level;
+    const hex = weaponHex(k);
+    const pips = Array.from({length:WEAPON_MAX_LEVEL}).map((_,i)=>`<span class="${i<lvl?'on':''}"></span>`).join("");
+    return `<div class="weapon-icon" style="--wcolor:${hex};"><div class="core"></div><div class="pips">${pips}</div></div>`;
+  }).join("");
+}
+
 function updateHud(){
   const p = game.player;
   document.getElementById("hp-fill").style.width = clamp(p.hp/p.maxHp*100,0,100)+"%";
   document.getElementById("xp-fill").style.width = clamp(p.xp/p.xpNeeded*100,0,100)+"%";
   document.getElementById("lvl-num").textContent = p.level;
   document.getElementById("wave-num").textContent = game.wave;
+  updateWeaponBar(p);
   document.getElementById("veil-indicator").style.opacity = insideVeil(p.x,p.y) ? 1 : 0;
   document.getElementById("score-num").textContent = game.score;
   const comboLabel = document.getElementById("combo-label");
@@ -2422,6 +2526,8 @@ document.getElementById("start-btn").addEventListener("click", ()=>{
   document.getElementById("minimap").classList.remove("hidden");
   document.getElementById("ult-wrap").classList.remove("hidden");
   document.getElementById("pause-btn").classList.remove("hidden");
+  document.getElementById("weapon-bar").classList.remove("hidden");
+  lastWeaponBarKey = "";
   game = newGame();
   startWave();
   running = true;

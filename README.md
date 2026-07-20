@@ -11,6 +11,13 @@ keine externen Schriftarten oder Tracker, keine fremden Assets.
 
 ## Umfang
 
+- **Startbildschirm in Tabs** (Spielen / Shop / Bestenliste / Optionen)
+  statt einer langen, scrollenden Liste.
+- **Automatisches Erst-Tutorial**: erscheint einmalig beim allerersten
+  Start, danach nie wieder (weiterhin über den "Anleitung"-Button
+  jederzeit abrufbar).
+- **Permanente Waffen-Leiste im HUD**: zeigt während des Laufs, welche
+  Waffen aktiv sind und auf welcher Stufe — ohne pausieren zu müssen.
 - **Ein echtes Ende**: Bei Welle 50 wartet Voidheart, der finale Kern von
   Nyxveil — ein echter Sieg mit eigenem Abschluss-Bildschirm. Danach
   kannst du entscheiden, ob du endlos weiterspielst.
